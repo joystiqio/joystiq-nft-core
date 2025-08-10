@@ -32,3 +32,13 @@ public(package) fun bytes_less_than(a: &vector<u8>, b: &vector<u8>): bool {
     // If equal up to min_len, shorter vector is "less"
     len_a < len_b
 }
+
+public fun bytes_eq(a: &vector<u8>, b: &vector<u8>): bool {
+    if (vector::length(a) != vector::length(b)) return false;
+    let mut i = 0;
+    while (i < vector::length(a)) {
+        if (*vector::borrow(a, i) != *vector::borrow(b, i)) return false;
+        i = i + 1;
+    };
+    true
+}
