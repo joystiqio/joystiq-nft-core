@@ -8,7 +8,7 @@ authors = ["Hercules (sirhercules27@yahoo.com)"]
 
 
 [addresses]
-joystiq = "0x7595ad0a79228628cf186c3ae70d0c94e78b8071a7dcaaab3e7104cd87b8af84"
+joystiq = "0xeace579752cd466d91aa73a60829674829d3e329bde76625340528b3954b79ea"
 
 [dev-dependencies]
 

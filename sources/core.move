@@ -21,7 +21,7 @@ public struct Root has key, store {
 
 public struct Collection has key, store {
     id: UID,
-    package: String,
+    package: std::ascii::String,
     name: String,
     mint_groups: vector<MintGroup>,
 }
@@ -64,6 +64,8 @@ public entry fun validate_unpaid(
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
+    //let package = std::string::from_ascii(*publisher.package());
+    //let collection = sui::dynamic_field::borrow_mut<String, Collection>(&mut root.id, package);
 
     assert!(collection.mint_groups[group_index].payments == 0, 0x99); // Group has to be unpaid
 
@@ -88,6 +90,8 @@ public entry fun validate<T>(
     coin: Coin<T>,
     ctx: &mut TxContext,
 ) {
+    //let package = std::string::from_ascii(*publisher.package());
+    //let collection = sui::dynamic_field::borrow_mut<String, Collection>(&mut root.id, package);
     assert!(collection.mint_groups[group_index].payments == 1, 0x100); // Group has to be exactly one payment
 
     // Validate the generic
@@ -137,6 +141,8 @@ public entry fun validate_2<T1, T2>(
     coin2: Coin<T2>,
     ctx: &mut TxContext,
 ) {
+    //let package = std::string::from_ascii(*publisher.package());
+    //let collection = sui::dynamic_field::borrow_mut<String, Collection>(&mut root.id, package);
     assert!(collection.mint_groups[group_index].payments == 2, 0x101); // Group has to be exactly two payments
 
     // Validate the generic
@@ -201,29 +207,24 @@ public entry fun validate_2<T1, T2>(
 COLLECTION REGISTRATION AND UPDATES
 -------------------*/
 public entry fun register_collection(
-    //root: &mut Root,
     publisher: &mut sui::package::Publisher,
     name: String,
     ctx: &mut TxContext,
 ) {
-    let package = std::string::from_ascii(*publisher.package());
-
-
+    
     let collection = Collection {
         id: object::new(ctx),
-        package,
+        package:*publisher.package(),
         name,
         mint_groups: vector::empty<MintGroup>(),
     };
 
     transfer::public_share_object(collection);
-
 }
 
 public entry fun update_collection(
-    //root: &mut Root,
     collection: &mut Collection,
-    _: &mut sui::package::Publisher,
+    publisher: &mut sui::package::Publisher,
     name: String,
     mg_name: vector<String>,
     mg_merkle_root: vector<Option<vector<u8>>>,
@@ -233,10 +234,7 @@ public entry fun update_collection(
     mg_end_time: vector<u64>,
     ctx: &mut TxContext,
 ) {
-    //let package = std::string::from_ascii(*publisher.package());
-
-    // Get the collection from the root object
-    //let collection = sui::dynamic_field::borrow_mut<String, Collection>(&mut root.id, package);
+    assert!(collection.package == *publisher.package());
 
     // Update the collection name
     collection.name = name;
@@ -281,9 +279,8 @@ PAYMENT FUNCTIONS
 -------------------*/
 
 public entry fun set_payments<C1, C2, D1, D2>(
-    //root: &mut Root,
     collection: &mut Collection,
-    _: &mut sui::package::Publisher,
+    publisher: &mut sui::package::Publisher,
     group_index: u64,
     payment_0_coin: Option<String>,
     payment_0_routes_methods: vector<String>,
@@ -295,6 +292,8 @@ public entry fun set_payments<C1, C2, D1, D2>(
     payment_1_routes_destinations: vector<Option<address>>,
     _ctx: &mut TxContext,
 ) {
+    assert!(collection.package == *publisher.package());
+
     //assert that if payment_1_coin is set, then payment_0_coin also must be set
     if (payment_1_coin.is_some() && payment_0_coin.is_none()) {
         abort 0x102
